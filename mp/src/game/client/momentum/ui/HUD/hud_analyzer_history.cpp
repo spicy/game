@@ -2,9 +2,7 @@
 #include "analyzer_history_data.h"
 
 // all features
-#include "analyzer_feature_base.h"
-#include "analyzer_feature_strafetrainer.h"
-#include "analyzer_feature_synctrainer.h"
+#include "analyzer_features.h"
 
 class CHudStrafeAnalyzerHistory : public CHudElement
 {
