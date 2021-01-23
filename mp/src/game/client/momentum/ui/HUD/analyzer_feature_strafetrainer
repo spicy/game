@@ -1,0 +1,6 @@
+#include "analyzer_feature_base"
+
+class CHudAnalyzerStrafeTrainer : public CHudFeatureBase
+{
+
+}
