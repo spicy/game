@@ -5,6 +5,21 @@
 #include "analyzer_feature_strafetrainer.h"
 #include "analyzer_feature_straferange.h"
 
+
+class CHudFeatureBase
+{
+public:
+    void OnThink() OVERRIDE;  
+    void Paint() OVERRIDE;  
+}
+
+//This would be moved to each features .h
+class CHudAnalyzerStrafeTrainer : public CHudFeatureBase
+{
+
+
+}
+
 class CHudStrafeAnalyzerHistory : public CHudElement
 {
 public:
@@ -12,7 +27,7 @@ public:
     void Paint() OVERRIDE;
     
 protected:
-  CUtilVect<Panel *> m_vecFeatures;
+  CUtilVect<CHudFeatureBase *> m_vecFeatures;
 }
 
 void CHudStrafeAnalyzerHistory::OnThink()
@@ -28,6 +43,18 @@ void CHudStrafeAnalyzerHistory::OnThink()
   ..
   .
   
+  // fill the vecFeatures 
+  m_vecFeatures.EnsureCount(3);
+    
+  CHudAnalyzerStrafeTrainer strafeTrainer;
+  m_vecFeatures.push_back(*strafeTrainer);
+    
+  CHudAnalyzerStrafeRange strafeRange;
+  m_vecFeatures.push_back(*strafeRange); 
+    
+  CHudAnalyzerSyncTrainer syncTrainer;
+  m_vecFeatures.push_back(*syncTrainer);
+    
   // after updating the history vector, run all features Think()
   for (auto feature : m_vecFeatures)
   {
