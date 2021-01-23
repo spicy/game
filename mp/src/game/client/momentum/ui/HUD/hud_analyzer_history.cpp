@@ -2,23 +2,9 @@
 #include "analyzer_history_data.h"
 
 // all features
+#include "analyzer_feature_base.h"
 #include "analyzer_feature_strafetrainer.h"
-#include "analyzer_feature_straferange.h"
-
-
-class CHudFeatureBase
-{
-public:
-    void OnThink() OVERRIDE;  
-    void Paint() OVERRIDE;  
-}
-
-//This would be moved to each features .h
-class CHudAnalyzerStrafeTrainer : public CHudFeatureBase
-{
-
-
-}
+#include "analyzer_feature_synctrainer.h"
 
 class CHudStrafeAnalyzerHistory : public CHudElement
 {
@@ -43,14 +29,9 @@ void CHudStrafeAnalyzerHistory::OnThink()
   ..
   .
   
-  // fill the vecFeatures 
-  m_vecFeatures.EnsureCount(3);
-    
+  // fill the vecFeatures  
   CHudAnalyzerStrafeTrainer strafeTrainer;
   m_vecFeatures.push_back(*strafeTrainer);
-    
-  CHudAnalyzerStrafeRange strafeRange;
-  m_vecFeatures.push_back(*strafeRange); 
     
   CHudAnalyzerSyncTrainer syncTrainer;
   m_vecFeatures.push_back(*syncTrainer);
