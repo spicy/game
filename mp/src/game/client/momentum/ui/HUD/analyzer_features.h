@@ -5,6 +5,6 @@ public:
     void Paint() OVERRIDE;  
 };
 
-class CHudAnalyzerStrafeTrainer : public CHudFeatureBase { };
-class CHudAnalyzerStrafeRange : public CHudFeatureBase { };
-class CHudAnalyzerSyncTrainer : public CHudFeatureBase { };
+class CHudAnalyzerStrafeTrainer : public CHudElement, public CHudFeatureBase { };
+class CHudAnalyzerStrafeRange : public CHudElement, public CHudFeatureBase { };
+class CHudAnalyzerSyncTrainer : public CHudElement, public CHudFeatureBase { };
