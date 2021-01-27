@@ -1,23 +1,6 @@
 #pragma once
 #include "utlvector.h"
 
-/*
-    double ButtonsPhi(KeyDir keyDir)
-    {
-        switch (keyDir) {
-        case       FORWARD: return 0;
-        case  FORWARD_LEFT: return M_PI / 4;
-        case          LEFT: return M_PI / 2;
-        case     BACK_LEFT: return 3 * M_PI / 4;
-        case          BACK: return -M_PI;
-        case    BACK_RIGHT: return -3 * M_PI / 4;
-        case         RIGHT: return -M_PI / 2;
-        case FORWARD_RIGHT: return -M_PI / 4;
-        default: return 0;
-        }
-    }
-*/
-
 enum class MouseDir
 {
     LEFT = -1,
@@ -60,9 +43,6 @@ struct StrafeHist
     KeyDir keyDir;
 
     PositionType positionType;
-
-    // int curYawX, curYawY;
-    // int perfYawX, perfYawY;  make a framebuffer array
 };
 
 class History
