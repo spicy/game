@@ -250,3 +250,5 @@ void CHudAnalyzerStrafeTrainer::Paint()
         }
     }
 }
+
+CHudAnalyzerStrafeTrainer *g_pStrafeTrainer;
