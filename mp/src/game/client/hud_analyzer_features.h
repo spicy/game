@@ -4,28 +4,19 @@
 
 using namespace vgui;
 
-class CHudAnalyzerFeatureBase
-{
+class CHudAnalyzerStrafeTrainer : public CHudElement, public vgui::EditablePanel
+{ 
+    DECLARE_CLASS_SIMPLE(CHudAnalyzerStrafeTrainer, vgui::EditablePanel);
+
   public:
-    virtual void Think();
-    virtual void Paint();
+    CHudAnalyzerStrafeTrainer(const char *pElementName);
+    void OnThink() override;
+    void Paint() override;
+    //void Init() override;
+    //void Reset() override;
 };
 
-class CHudAnalyzerStrafeTrainer : public CHudAnalyzerFeatureBase
-{
-  public:
-    void Think() override;
-    void Paint() override;
-};
-class CHudAnalyzerStrafeRange : public CHudAnalyzerFeatureBase
-{
-  public:
-    void Think() override;
-    void Paint() override;
-};
-class CHudAnalyzerSyncTrainer : public CHudAnalyzerFeatureBase
-{
-  public:
-    void Think() override;
-    void Paint() override;
-};
+extern CHudAnalyzerStrafeTrainer *g_pStrafeTrainer;
+
+//class CHudAnalyzerStrafeRange
+//class CHudAnalyzerSyncTrainer

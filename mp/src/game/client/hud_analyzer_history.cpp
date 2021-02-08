@@ -13,7 +13,6 @@
 #include "iclientmode.h"
 
 #include "vgui_controls/EditablePanel.h"
-#include "utlvector.h"
 
 //#include "VGuiMatSurface/IMatSystemSurface.h"
 //#include "vgui/ILocalize.h"
@@ -29,6 +28,8 @@
 
 using namespace vgui;
 
+double subtractAngle(double angle1, double angle2);
+
 class CHudStrafeAnalyzerHistory : public CHudElement, public EditablePanel
 {
   public:
@@ -37,8 +38,7 @@ class CHudStrafeAnalyzerHistory : public CHudElement, public EditablePanel
     CHudStrafeAnalyzerHistory(const char *pElementName)
         : CHudElement(pElementName), EditablePanel(g_pClientMode->GetViewport(), pElementName)
     {
-        ivgui()->AddTickSignal(GetVPanel(), 100);
-
+        ivgui()->AddTickSignal(GetVPanel(), 50);
         // m_pSlider = new Slider(this, "SomeSlider");
 
         LoadControlSettings("resource/ui/hud/HudStrafeAnalyzer.res"); // Loading layout/etc settings, to be reloaded
@@ -46,7 +46,8 @@ class CHudStrafeAnalyzerHistory : public CHudElement, public EditablePanel
     }
     ~CHudStrafeAnalyzerHistory() { ivgui()->RemoveTickSignal(GetVPanel()); }
 
-
+    // Give History access to features
+    friend CHudAnalyzerStrafeTrainer;
 
   protected:
     bool ShouldDraw() override;
@@ -59,7 +60,8 @@ class CHudStrafeAnalyzerHistory : public CHudElement, public EditablePanel
     void Paint() override;
 
   private:
-    CUtlVector<CHudAnalyzerFeatureBase *> m_vecFeatures;
+    CUtlVector<Panel *> m_vecFeatures;
+    CUtlVector<StrafeHist> strafes; // global for features/extern? or use friends
 };
 
 DECLARE_HUDELEMENT(CHudStrafeAnalyzerHistory);
@@ -68,8 +70,6 @@ DECLARE_HUDELEMENT(CHudStrafeAnalyzerHistory);
 
 static MAKE_TOGGLE_CONVAR(mom_hud_strafeanalyzer_enable, "1", FCVAR_ARCHIVE,
                           "Enables strafe analyzer. 0 = OFF, 1 = ON.\n");
-
-CUtlVector<StrafeHist> History::strafes;
 
 /// <summary>
 /// Runs each frame, before Paint()
@@ -138,7 +138,7 @@ void CHudStrafeAnalyzerHistory::OnThink()
 
     // g_strafeDir = eMouseDir;
 
-    auto speed = hypot(vecVel.x, vecVel.y);
+    double speed = hypot(vecVel.x, vecVel.y);
 
     // Pos type
     switch (pNormalPlayer->GetFlags())
@@ -159,16 +159,14 @@ void CHudStrafeAnalyzerHistory::OnThink()
     const int ACCEL_LIMIT = 30;
     static ConVarRef airAccel("sv_airaccelerate");
     double accelSpeed = min((1 / TICK_INTERVAL) * ACCEL_LIMIT * airAccel.GetFloat(), ACCEL_LIMIT);
-    double lazyPerfDeltaYaw = RAD2DEG(atan2f(accelSpeed, speed));
+    double perfDeltaYaw = RAD2DEG(atan2f(accelSpeed, speed));
 
-    // if (playerHasBeenOnGround(History::strafeHist.size() - 1))
+    //if (playerHasBeenOnGround(History::strafes.size() - 1))
     //{
-    //    perfYaw = 1.18; // Hacky way of getting the correct prespeed angle
+    //    perfYaw = 1.18; // Hacky way of getting the correct prespeed angle, can find better method
     //}
 
-    // This swaps all elements (except the last) to the right.
-    // this essentially removes the last element (oldest tick) from the vector
-    // start at the top of the vector, and set each value to the previous value, shifting everything right.
+    // This swaps all elements to the right, and removes the last element from the vector (oldest tick).
     for (int i = History::strafes.Size() - 1; i > 0; i--)
         History::strafes[i] = History::strafes[i - 1];
 
@@ -177,26 +175,19 @@ void CHudStrafeAnalyzerHistory::OnThink()
     History::strafes[0].vel = vecVel;
     History::strafes[0].viewangles = angAngles;
     History::strafes[0].deltaYaw = abs(dbDeltaYaw);
-    History::strafes[0].lazyPerfDeltaYaw = lazyPerfDeltaYaw;
+    History::strafes[0].perfDeltaYaw = perfDeltaYaw;
+    History::strafes[0].speed = speed;
     History::strafes[0].buttons = iButtons;
-    History::strafes[0].synced = false; // checkSynced();
+    History::strafes[0].syncState = SyncType::SYNCED; // checkSynced();
     History::strafes[0].jumped = false; // checkJumped();
     History::strafes[0].mouseDir = eMouseDir;
     History::strafes[0].keyDir = eKeyDir;
     History::strafes[0].positionType = ePosType;
 
-    ////////////////////////////////////////////////////////////////
-    // fill the vecFeatures
-    //m_vecFeatures.EnsureCount(3);
-    //m_vecFeatures[0] = new CHudAnalyzerStrafeTrainer;
-
-    //CHudAnalyzerSyncTrainer syncTrainer;
-    //m_vecFeatures.push_back(*syncTrainer);
-
     // after updating the history vector, run all features Think()
     for (auto feature : m_vecFeatures)
     {
-        feature->Think();
+        feature->OnThink();
     }
 }
 
@@ -226,12 +217,17 @@ bool CHudStrafeAnalyzerHistory::ShouldDraw()
 /// </summary>
 void CHudStrafeAnalyzerHistory::Init()
 {
+    //fill the vecFeatures
+    m_vecFeatures.AddToTail(new CHudAnalyzerStrafeTrainer("HudStrafeTrainer"));
+    //m_vecFeatures.AddToTail(new CHudAnalyzer___("Hud___"));
+    //m_vecFeatures.AddToTail(new CHudAnalyzer___("Hud___"));
+
     int REPLACE_WITH_HISTORY_SIZE_CONVAR = 100;
     History::strafes.EnsureCount(REPLACE_WITH_HISTORY_SIZE_CONVAR);
 }
 
 /// <summary>
-/// Called on connect + mapchange
+/// Called on connect / mapchange
 /// </summary>
 void CHudStrafeAnalyzerHistory::LevelInit()
 {
@@ -244,7 +240,7 @@ void CHudStrafeAnalyzerHistory::LevelInit()
 void CHudStrafeAnalyzerHistory::LevelShutdown() { History::strafes.PurgeAndDeleteElements(); }
 
 /// <summary>
-/// Subtracts two angles and finds the smallest angle between any two angles
+/// Finds the smallest angle between any two angles
 /// Input: two angles, Output: smallest angle between them
 /// </summary>
 double subtractAngle(double angle1, double angle2)
@@ -259,5 +255,4 @@ double subtractAngle(double angle1, double angle2)
 
     return temp;
 }
-
 
