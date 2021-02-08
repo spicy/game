@@ -1,10 +1,22 @@
-class CHudFeatureBase : public CHudElement
+#pragma once
+#include "hudelement.h"
+#include "vgui_controls/EditablePanel.h"
+
+using namespace vgui;
+
+class CHudAnalyzerStrafeTrainer : public CHudElement, public vgui::EditablePanel
 {
-public:
-    void OnThink() override;  
-    void Paint() override;  
+    DECLARE_CLASS_SIMPLE(CHudAnalyzerStrafeTrainer, vgui::EditablePanel);
+
+  public:
+    CHudAnalyzerStrafeTrainer(const char *pElementName);
+    void OnThink() override;
+    void Paint() override;
+    // void Init() override;
+    // void Reset() override;
 };
 
-class CHudAnalyzerStrafeTrainer : public CHudFeatureBase { };
-class CHudAnalyzerStrafeRange : public CHudFeatureBase { };
-class CHudAnalyzerSyncTrainer : public CHudFeatureBase { };
+extern CHudAnalyzerStrafeTrainer *g_pStrafeTrainer;
+
+// class CHudAnalyzerStrafeRange
+// class CHudAnalyzerSyncTrainer
