@@ -94,6 +94,21 @@ enum SpeedometerLabel_t
     SPEEDOMETER_LABEL_TYPE_COUNT
 };
 
+enum Analyzer_Features
+{
+    ANALYZER_STRAFETRAINER = 0,
+    //ANALYZER_SYNCTRAINER,
+    //ANALYZER_STRAFERANGE,
+    //ANALYZER_DEADZONE_INDICATOR,
+    //ETC
+    ANALYZER_FEATURE_COUNT
+};
+
+enum Analyzer_StrafeTrainer
+{
+
+};
+
 static const char *const g_szSubmitStates[] = {
     "#MOM_MF_RunSubmitFail_Unknown",          // RUN_SUBMIT_UNKNOWN
     "#MOM_MF_RunSubmitted",                   // RUN_SUBMIT_SUCCESS

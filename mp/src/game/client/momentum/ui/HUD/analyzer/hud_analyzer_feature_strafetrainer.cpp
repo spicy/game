@@ -1,4 +1,4 @@
-
+#include "cbase.h"
 #include "hud_analyzer_features.h"
 #include "hud_analyzer_history_data.h"
 
@@ -13,13 +13,9 @@
 #include "tier0/memdbgon.h"
 
 using namespace vgui;
+
 static MAKE_TOGGLE_CONVAR(mom_hud_analyzer_strafetrainer, "1", FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_ARCHIVE,
                           "Toggles displaying the strafe trainer graph.\n");
-
-static ConVar analyzer_strafetrainer_type("mom_hud_strafetrainer_type", "1",
-                                          FCVAR_CLIENTDLL | FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_ARCHIVE,
-                                          "1: Filled graph\n 2: Line Graph\n 3: Horizontal Bar\n 4: Vertical Bar\n",
-                                          true, 1, true, 4);
 
 static MAKE_TOGGLE_CONVAR(analyzer_strafetrainer_colorize, "1", FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_ARCHIVE,
                           "Toggles strafetrainer data colorization type based on sync and speedloss. 0 to disable and "
@@ -28,31 +24,24 @@ static MAKE_TOGGLE_CONVAR(analyzer_strafetrainer_colorize, "1", FCVAR_CLIENTCMD_
 static MAKE_TOGGLE_CONVAR(mom_hud_strafetrainer_centered, "1", FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_ARCHIVE,
                           "Centers the strafe trainer graph.\n");
 
-static ConVar analyzer_strafetrainer_xoffset(
-    "mom_hud_analyzer_strafetrainer_xoffset", "960", FCVAR_CLIENTDLL | FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_ARCHIVE,
-    "The X coordinate of the strafe trainer graph on the players screen, if not centered\n", true, 0, false, 0);
+static MAKE_TOGGLE_CONVAR(mom_hud_analyzer_strafetrainer_stats, "1", FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_ARCHIVE,
+                          "Toggles displaying the strafe trainer stats.\n");
+
+static ConVar analyzer_strafetrainer_type("mom_hud_strafetrainer_type", "1",
+                                          FCVAR_CLIENTDLL | FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_ARCHIVE,
+                                          "1: Filled graph\n 2: Line Graph\n 3: Horizontal Bar\n 4: Vertical Bar\n",
+                                          true, 1, true, 4);
+
+static ConVar analyzer_strafetrainer_xoffset("mom_hud_analyzer_strafetrainer_xoffset", "960", 
+                                              FCVAR_CLIENTDLL | FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_ARCHIVE,
+                                              "The X coordinate of the strafe trainer graph on the players screen, if not centered\n", true, 0, false, 0);
 
 static ConVar analyzer_strafetrainer_yoffset("mom_hud_analyzer_strafetrainer_yoffset", "1000",
                                              FCVAR_CLIENTDLL | FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_ARCHIVE,
                                              "The Y coordinate of the strafe trainer graph on the players screen\n",
                                              true, 0, false, 0);
 
-static MAKE_TOGGLE_CONVAR(mom_hud_analyzer_strafetrainer_stats, "1", FCVAR_CLIENTCMD_CAN_EXECUTE | FCVAR_ARCHIVE,
-                          "Toggles displaying the strafe trainer stats.\n");
-
 CHudAnalyzerStrafeTrainer *g_pStrafeTrainer = nullptr;
-
-CHudAnalyzerStrafeTrainer::CHudAnalyzerStrafeTrainer(const char *pElementName)
-    : CHudElement(pElementName), EditablePanel(g_pClientMode->GetViewport(), "HudStrafeAnalyzer")
-{
-    // ListenForGameEvent("zone_exit");
-    // ListenForGameEvent("zone_enter");
-}
-
-void CHudAnalyzerStrafeTrainer::OnThink()
-{
-    // Update the values of our strafe trainer stat labels
-}
 
 bool playerHasBeenOnGround(int index)
 {
@@ -106,6 +95,17 @@ Color getCurTickColor(int index, double tolerance)
         }
     }
     return curStateColor;
+}
+
+CHudAnalyzerStrafeTrainer::CHudAnalyzerStrafeTrainer(const char *pElementName)
+    : CHudElement(pElementName), EditablePanel(g_pClientMode->GetViewport(), "HudStrafeAnalyzer")
+{
+    //...
+}
+
+void CHudAnalyzerStrafeTrainer::OnThink()
+{
+    // Update the values of our strafe trainer stat labels
 }
 
 void CHudAnalyzerStrafeTrainer::Paint()
@@ -251,4 +251,4 @@ void CHudAnalyzerStrafeTrainer::Paint()
     }
 }
 
-CHudAnalyzerStrafeTrainer *g_pStrafeTrainer;
+//CHudAnalyzerStrafeTrainer *g_pStrafeTrainer;

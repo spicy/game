@@ -1,28 +1,23 @@
 #include "cbase.h"
 
-#include <hudelement.h>
-
-#include "c_mom_player.h"
-
+#include "hud_analyzer_history.h"
+#include "hud_analyzer_features.h"
+#include "hud_analyzer_history_data.h"
 #include "hud_macros.h"
 
 #include "mom_shareddefs.h"
 #include "mom_system_gamemode.h"
 
+#include "in_buttons.h"
 #include "iclientmode.h"
 #include "view.h"
+#include <hudelement.h>
+#include "c_mom_player.h"
 
 #include "vgui_controls/EditablePanel.h"
-
-//#include "VGuiMatSurface/IMatSystemSurface.h"
-//#include "vgui/ILocalize.h"
 #include "vgui/ISurface.h"
 #include "vgui/IVGui.h"
 
-#include "hud_analyzer_features.h"
-#include "hud_analyzer_history_data.h"
-
-#include "in_buttons.h"
 
 #include "tier0/memdbgon.h"
 
@@ -30,46 +25,27 @@ using namespace vgui;
 
 double subtractAngle(double angle1, double angle2);
 
-class CHudStrafeAnalyzerHistory : public CHudElement, public EditablePanel
-{
-  public:
-    DECLARE_CLASS_SIMPLE(CHudStrafeAnalyzerHistory, vgui::EditablePanel);
-
-    CHudStrafeAnalyzerHistory(const char *pElementName)
-        : CHudElement(pElementName), EditablePanel(g_pClientMode->GetViewport(), pElementName)
-    {
-        ivgui()->AddTickSignal(GetVPanel(), 50);
-        // m_pSlider = new Slider(this, "SomeSlider");
-
-        LoadControlSettings("resource/ui/hud/HudStrafeAnalyzer.res"); // Loading layout/etc settings, to be reloaded
-                                                                      // with "hud_reloadcontrols"
-    }
-    ~CHudStrafeAnalyzerHistory() { ivgui()->RemoveTickSignal(GetVPanel()); }
-
-    // Give History access to features
-    friend CHudAnalyzerStrafeTrainer;
-
-  protected:
-    bool ShouldDraw() override;
-
-    void Init() override;
-    void LevelInit() override;
-    void LevelShutdown() override;
-
-    void OnThink() override;
-    void Paint() override;
-
-  private:
-    CUtlVector<Panel *> m_vecFeatures;
-    CUtlVector<StrafeHist> strafes; // global for features/extern? or use friends
-};
-
 DECLARE_HUDELEMENT(CHudStrafeAnalyzerHistory);
 
-// DECLARE_HUD_MESSAGE(CHudStrafeAnalyzerHistory, DataUpdate);
+//DECLARE_HUD_MESSAGE(CHudStrafeAnalyzerHistory, DataUpdate);
 
 static MAKE_TOGGLE_CONVAR(mom_hud_strafeanalyzer_enable, "1", FCVAR_ARCHIVE,
                           "Enables strafe analyzer. 0 = OFF, 1 = ON.\n");
+
+CHudStrafeAnalyzerHistory::CHudStrafeAnalyzerHistory(const char *pElementName)
+    : CHudElement(pElementName), EditablePanel(g_pClientMode->GetViewport(), pElementName)
+{
+    LoadControlSettings("resource/ui/hud/HudStrafeAnalyzer.res"); // Loading layout/etc settings, to be reloaded
+                                                                  // with "hud_reloadcontrols"
+    ListenForGameEvent("zone_exit");
+    ListenForGameEvent("zone_enter");
+    ListenForGameEvent("player_jumped");
+    ListenForGameEvent("ramp_leave");
+    ListenForGameEvent("ramp_board");
+
+    SetKeyBoardInputEnabled(false);
+    SetMouseInputEnabled(false);
+}
 
 /// <summary>
 /// Runs each frame, before Paint()
@@ -217,10 +193,8 @@ bool CHudStrafeAnalyzerHistory::ShouldDraw()
 /// </summary>
 void CHudStrafeAnalyzerHistory::Init()
 {
-    // fill the vecFeatures
-    m_vecFeatures.AddToTail(new CHudAnalyzerStrafeTrainer("HudStrafeTrainer"));
-    // m_vecFeatures.AddToTail(new CHudAnalyzer___("Hud___"));
-    // m_vecFeatures.AddToTail(new CHudAnalyzer___("Hud___"));
+    m_vecFeatures.EnsureCount(ANALYZER_FEATURE_COUNT);
+    m_vecFeatures[ANALYZER_STRAFETRAINER] = (new CHudAnalyzerStrafeTrainer("HudStrafeTrainer"));
 
     int REPLACE_WITH_HISTORY_SIZE_CONVAR = 100;
     History::strafes.EnsureCount(REPLACE_WITH_HISTORY_SIZE_CONVAR);
@@ -238,6 +212,29 @@ void CHudStrafeAnalyzerHistory::LevelInit()
 /// Called on disconnect/mapchange/etc
 /// </summary>
 void CHudStrafeAnalyzerHistory::LevelShutdown() { History::strafes.PurgeAndDeleteElements(); }
+
+void CHudStrafeAnalyzerHistory::FireGameEvent(IGameEvent *pEvent)
+{
+    /*
+    C_MomentumPlayer *pLocal = C_MomentumPlayer::GetLocalMomPlayer();
+    if (!pLocal || !m_pRunEntData) return;
+
+    if (FStrEq(pEvent->GetName(), "player_jumped"))
+    {
+
+    }
+
+    if (FStrEq(pEvent->GetName(), "ramp_board"))
+    {
+
+    }
+
+    if (FStrEq(pEvent->GetName(), "ramp_leave"))
+    {
+
+    }
+    */
+}
 
 /// <summary>
 /// Finds the smallest angle between any two angles

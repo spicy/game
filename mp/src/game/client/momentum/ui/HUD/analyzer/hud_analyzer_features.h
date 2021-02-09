@@ -16,7 +16,7 @@ class CHudAnalyzerStrafeTrainer : public CHudElement, public vgui::EditablePanel
     // void Reset() override;
 };
 
-extern CHudAnalyzerStrafeTrainer *g_pStrafeTrainer;
+//extern CHudAnalyzerStrafeTrainer *g_pStrafeTrainer;
 
 // class CHudAnalyzerStrafeRange
 // class CHudAnalyzerSyncTrainer
